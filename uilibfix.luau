@@ -1,4 +1,4 @@
--- why is every ui lib retarded mb it just is
+-- why is every ui lib retarded mb it just is why did createbind have it set the name of bind to the frame name and the text to "Keybind Info"
 local FuzkiLib = {}
 
 function FuzkiLib:Create(name, gameName)
