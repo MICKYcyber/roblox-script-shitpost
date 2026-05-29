@@ -200,6 +200,13 @@ function FuzkiLib:Create(name, gameName)
             tglLine.BorderSizePixel = 0
             tglLine.Position = UDim2.new(0.0390804596, 0, 0.980000019, 0)
             tglLine.Size = UDim2.new(0, 401, 0, 1)
+            local labelAPI = {}
+
+            function labelAPI:SetText(newText)
+                TextLabel.Text = newText
+            end
+
+            return labelAPI
         end
         function Items:CreateButton(text, info, callback)
             text = text or "Button Epic"
