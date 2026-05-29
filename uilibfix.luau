@@ -1,6 +1,82 @@
 -- why is every ui lib retarded mb it just is why did createbind have it set the name of bind to the frame name and the text to "Keybind Info"
 local FuzkiLib = {}
+local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+local lookup = {}
+for i = 1, #chars do
+	lookup[chars:sub(i, i)] = i - 1
+end
+local function base64encode(data)
+	local result = {}
+	local i = 1
 
+	while i <= #data do
+		local a = data:byte(i) or 0
+		local b = data:byte(i + 1) or 0
+		local c = data:byte(i + 2) or 0
+
+		local n = a * 65536 + b * 256 + c
+
+		local c1 = math.floor(n / 262144) % 64
+		local c2 = math.floor(n / 4096) % 64
+		local c3 = math.floor(n / 64) % 64
+		local c4 = n % 64
+
+		result[#result + 1] = chars:sub(c1 + 1, c1 + 1)
+		result[#result + 1] = chars:sub(c2 + 1, c2 + 1)
+
+		if i + 1 <= #data then
+			result[#result + 1] = chars:sub(c3 + 1, c3 + 1)
+		else
+			result[#result + 1] = "="
+		end
+
+		if i + 2 <= #data then
+			result[#result + 1] = chars:sub(c4 + 1, c4 + 1)
+		else
+			result[#result + 1] = "="
+		end
+
+		i += 3
+	end
+
+	return table.concat(result)
+end
+local function base64decode(data)
+	data = data:gsub("[^%w%+%/%=]", "")
+	local result = {}
+	local i = 1
+
+	while i <= #data do
+		local c1 = lookup[data:sub(i, i)] or 0
+		local c2 = lookup[data:sub(i + 1, i + 1)] or 0
+		local c3 = lookup[data:sub(i + 2, i + 2)] or 0
+		local c4 = lookup[data:sub(i + 3, i + 3)] or 0
+
+		local n = c1 * 262144 + c2 * 4096 + c3 * 64 + c4
+
+		local a = math.floor(n / 65536) % 256
+		local b = math.floor(n / 256) % 256
+		local c = n % 256
+
+		result[#result + 1] = string.char(a)
+
+		if data:sub(i + 2, i + 2) ~= "=" then
+			result[#result + 1] = string.char(b)
+		end
+		if data:sub(i + 3, i + 3) ~= "=" then
+			result[#result + 1] = string.char(c)
+		end
+
+		i += 4
+	end
+	return table.concat(result)
+end
+function FuzkiLib:BaseEncode(value)
+    return base64encode(value)
+end
+function FuzkiLib:BaseDecode(value)
+    return base64decode(value)
+end
 function FuzkiLib:Create(name, gameName)
     name = name or "Name"
     gameName = gameName or "Game Name"
